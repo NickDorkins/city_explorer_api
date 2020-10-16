@@ -16,10 +16,6 @@ const app = express();
 app.use(cors());
 
 // Routes
-app.get('/', (request, response) =>{
-  response.send('Hello World');
-});
-
 app.get('/location', (request, response) => {
 let city = request.query.city;
 let locationData = require('./data/location.json')[0];
