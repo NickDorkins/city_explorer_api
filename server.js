@@ -20,6 +20,21 @@ app.get('/', (request, response) =>{
   response.send('Hello World');
 });
 
+app.get('/location', (request, response) => {
+let city = request.query.city;
+let locationData = require('./data/location.json')[0];
+let location = new Location (locationData, city);
+response.send(location);
+console.log('CITY', city);
+});
+
+function Location(obj, query){
+  this.latitude = obj.lat;
+  this.longitude = obj.lon;
+  this.search_query = query;
+  this.formatted_query = obj.display_name;
+}
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is now listening on port ${PORT}`);
