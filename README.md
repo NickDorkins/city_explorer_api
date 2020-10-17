@@ -8,7 +8,32 @@ City Explorer is an app that allows the user to input the name of cities and hav
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
 
 ## Getting Started
-To get started with building a simliar app the user must create a repository and in 
+To get started with building a simliar app the user must create a repository. 
+
+Once the Repo is created you need to create your scaffolding in your file structures, in this case we created the server.js file and this will be the main reference for the contents of the backend.
+
+run
+```
+npm init -y
+``` 
+This creates the `package.json` file.
+
+run
+```
+npm install express dotenv cors
+```
+This installs the `express`, `dotenv`, and `cors` dependencies
+
+Run
+```
+nodemon
+``` 
+> If you need to install the `nodemon` use `npm install -g nodemon`.
+
+> If you are having permission issues use `sudo npm install -g nodemon`.
+
+Use the 
+
 <!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
 
 ## Architecture
