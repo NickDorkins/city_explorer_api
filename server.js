@@ -15,17 +15,26 @@ const app = express();
 // CORS (Cross Origin Resource Sharing)
 app.use(cors());
 
+function errorHandling(error, request, response) {
+  response.status(500).send(error);
+}
+
 // Routes
 app.get('/', (request, response) =>{
   response.send('Hello World');
  })
 
 app.get('/location', (request, response) => {
+  try {
 let city = request.query.city;
 let locationData = require('./data/location.json')[0];
 let location = new Location (locationData, city);
 response.send(location);
 console.log('CITY', city);
+  }
+  catch(error){
+    errorHandling('Mother does not play that!', request, response);
+  }
 });
 
 function Location(obj, query){
@@ -36,12 +45,17 @@ function Location(obj, query){
 }
 
 app.get('/weather', (request, response) => {
+  try {
   let data = require('./data/weather.json');
   let weatherArray = [];
   data.data.forEach(val => {
-    weatherArray.push(new Weather(val));  
+    weatherArray.push(new Weather(val));
   });
   response.send(weatherArray);
+}
+catch(error){
+  errorHandling('Mother does not play that!', request, response);
+}
 })
 
 function Weather (obj){
