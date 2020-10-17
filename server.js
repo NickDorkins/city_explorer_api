@@ -16,6 +16,10 @@ const app = express();
 app.use(cors());
 
 // Routes
+app.get('/', (request, response) =>{
+  response.send('Hello World');
+ })
+
 app.get('/location', (request, response) => {
 let city = request.query.city;
 let locationData = require('./data/location.json')[0];
@@ -29,6 +33,20 @@ function Location(obj, query){
   this.longitude = obj.lon;
   this.search_query = query;
   this.formatted_query = obj.display_name;
+}
+
+app.get('/weather', (request, response) => {
+  let data = require('./data/weather.json');
+  let weatherArray = [];
+  data.data.forEach(val => {
+    weatherArray.push(new Weather(val));  
+  });
+  response.send(weatherArray);
+})
+
+function Weather (obj){
+  this.forecast = obj.weather.description;
+  this.time = new Date(obj.valid_date).toDateString();
 }
 
 // Start Server
