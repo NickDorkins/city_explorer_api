@@ -18,9 +18,9 @@ const app = express();
 // CORS (Cross Origin Resource Sharing)
 app.use(cors());
 
-// function errorHandling(request, response) {
-//   response.status(500).send('Broken!');
-// }
+function errorHandling(request, response) {
+  response.status(500).send('Broken!');
+}
 
 function notFoundHandler(request, response) {
   response.status(404).send('Oops! Handler not found. Try again!');
@@ -28,9 +28,11 @@ function notFoundHandler(request, response) {
 
 // Routes
 app.get('/location', locationHandler);
-// app.get('/weather', weatherHandler);
+app.get('/weather', weatherHandler);
 app.use('*', notFoundHandler)
 
+
+// Geographic Location Handler
 function locationHandler(request, response) {
   let city = request.query.city;
   let key = process.env.GEOCODE_API_KEY;
@@ -47,7 +49,31 @@ function locationHandler(request, response) {
     });
 }
 
-// Constructors
+// Weather Handler
+function weatherHandler(request, response) {
+  let key = process.env.WEATHER_API_KEY;
+  let lon = request.query.longitude;
+  let lat = request.query.latitude;
+  const URL = `https://api.weatherbit.io/v2.0/forecast/daily/?key=${key}&lat=${lat}&lon=${lon}`;
+  
+  superagent.get(URL)
+  .then(data => {
+    let weather = new Weather(data.body.data[0]);
+    response.status(200).send(weather);
+    // console.log(weather);
+    console.log(data.body.data[0]);
+  })
+  .catch((error) => {
+    response.status(500).send('Mother does not play that!');
+    console.log(error);
+  });
+  // console.log(URL);
+  // console.log('LATITUDE', lat);
+  // console.log('LONGITUDE', lon);
+}
+
+
+// Location Constructor
 function Location(obj, query) {
   this.latitude = obj.lat;
   this.longitude = obj.lon;
@@ -55,22 +81,7 @@ function Location(obj, query) {
   this.formatted_query = obj.display_name;
 }
 
-
-function weatherHandler(request, response) {
-  try {
-    let data = require('./data/weather.json');
-    let weatherArray = [];
-    data.data.forEach(val => {
-      weatherArray.push(new Weather(val));
-    });
-    response.send(weatherArray);
-  }
-  catch (error) {
-    errorHandling('Mother does not play that!', request, response);
-    console.log(error);
-  }
-}
-
+// Weather Constructor
 function Weather(obj) {
   this.forecast = obj.weather.description;
   this.time = new Date(obj.valid_date).toDateString();
@@ -78,9 +89,5 @@ function Weather(obj) {
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server is now listening on port ${PORT}`);
+  console.log(`Server port ${PORT} is ALIVE!!! MWAHAHAHA!!!!`);
 });
-
-
-
-
