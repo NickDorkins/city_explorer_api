@@ -5,12 +5,16 @@ const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
 const { response } = require('express');
+const pg = require('pg');
 
 // Environment Variables
 require('dotenv').config();
 
 // Declare Port
 const PORT = process.env.PORT || 3000;
+
+// create postgres client
+const client = new pg.Client(process.env.DATABASE_URL);
 
 // Express Start/Insantiate
 const app = express();
@@ -23,13 +27,13 @@ function errorHandling(request, response) {
 }
 
 function notFoundHandler(request, response) {
-  response.status(404).send('Oops! Handler not found. Try again!');
+  response.status(404).send('NOT TODAY SATAN!');
 }
 
 // Routes
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
-app.use('*', notFoundHandler)
+app.use('*', notFoundHandler);
 
 
 // Geographic Location Handler
