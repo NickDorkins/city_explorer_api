@@ -58,7 +58,10 @@ function weatherHandler(request, response) {
   
   superagent.get(URL)
   .then(data => {
-    let weather = new Weather(data.body.data[0]);
+    let weather = data.body.data.map(val => {
+      return new Weather(val);
+    });
+    weather = weather.slice(0, 8);
     response.status(200).send(weather);
     // console.log(weather);
     console.log(data.body.data[0]);
