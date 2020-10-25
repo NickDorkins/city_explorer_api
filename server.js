@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 // create postgres client
 const client = new pg.Client(process.env.DATABASE_URL);
+client.on('error', err => console.error(err));
 
 // Express Start/Insantiate
 const app = express();
@@ -42,16 +43,37 @@ app.use('*', notFoundHandler);
 // Geographic Location Handler
 function locationHandler(request, response) {
   let city = request.query.city;
+  console.log('city', city);
+  // Calls in API Key from .env file
   let key = process.env.GEOCODE_API_KEY;
-  let URL = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
-  // console.log(URL);
-  superagent.get(URL)
-    .then(data => {
-      let location = new Location(data.body[0], city);
-      response.status(200).json(location);
+  // Check for previous cache of results
+  const sqlQuery = `SELECT * FROM location WHERE search_query=$1`;
+  let safeVal = [city];
+  // console.log(client);
+  client.query(sqlQuery, safeVal)
+    .then(output => {
+      // console.log('output', output);
+      // Use previously cached data
+      if (output.rowCount) {
+        console.log('Data from Database');
+        response.status(200).send(output.rows[0]);
+      } else {
+        // Call in new data from API Call (if no previous cache data exists)
+        const URL = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
+
+        superagent.get(URL)
+          .then(data => {
+            let location = new Location(data.body[0], city);
+            const insertSql = `INSERT INTO location (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4)`;
+            client.query(insertSql, [location.search_query, location.formatted_query, location.latitude, location.longitude])
+              .then(results =>
+                response.status(200).json(location));
+                console.log('Ran API call for ', location);
+          })
+      }
     })
     .catch((error) => {
-      response.status(500).send('Go back to Party City! Location Handler is not working!');
+      response.status(500).send('It takes a lot of money to look this cheap! Location Handler is not working!(500)');
       console.log(error);
     });
 }
@@ -71,10 +93,10 @@ function weatherHandler(request, response) {
       weather = weather.slice(0, 8);
       response.status(200).send(weather);
       // console.log(weather);
-      console.log(data.body.data[0]);
+      // console.log(data.body.data[0]);
     })
     .catch((error) => {
-      response.status(500).send('All tea no shade! Weather Handler is not working!');
+      response.status(500).send('All tea no shade, no pink lemonade! Weather Handler is not working!(500)');
       console.log(error);
     });
   // console.log(URL);
@@ -83,8 +105,8 @@ function weatherHandler(request, response) {
 }
 
 // Trails Handler
-function trailsHandler (request, response) {
-  console.log('Not today shady lady!')
+function trailsHandler(request, response) {
+  // console.log('Not today shady lady!')
   let key = process.env.TRAIL_API_KEY;
   let lon = request.query.longitude;
   let lat = request.query.latitude;
@@ -133,7 +155,13 @@ function Trails(obj) {
   this.condition_time = obj.conditionDate.slice(11, 20);
 }
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server port ${PORT} is ALIVE!!! MWAHAHAHA!!!!`);
-});
+// Database Connection
+client.connect()
+.then(() => {
+  // Start Server
+  app.listen(PORT, () => {
+    console.log(`Server port ${PORT} is ALIVE!!! MWAHAHAHA!!!!`);
+  });
+})
+.catch(error => console.error(error));
+

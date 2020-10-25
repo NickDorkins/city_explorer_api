@@ -14,7 +14,7 @@ CREATE TABLE weather (
   id SERIAL PRIMARY KEY,
   forecast VARCHAR(255),
   time DATE
-)
+);
 
 CREATE TABLE trails (
   id SERIAL PRIMARY KEY,
@@ -28,4 +28,4 @@ CREATE TABLE trails (
   conditions VARCHAR(255),
   condition_date DATE,
   condition_time TIME
-)
+);
