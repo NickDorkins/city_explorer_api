@@ -37,6 +37,7 @@ function notFoundHandler(request, response) {
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
 app.get('/trails', trailsHandler);
+app.get('/movies', moviesHandler);
 app.use('*', notFoundHandler);
 
 
@@ -96,7 +97,7 @@ function weatherHandler(request, response) {
       // console.log(data.body.data[0]);
     })
     .catch((error) => {
-      response.status(500).send('All tea no shade, no pink lemonade! Weather Handler is not working!(500)');
+      response.status(500).send('No T, no shade, no pink lemonade! Weather Handler is not working!(500)');
       console.log(error);
     });
   // console.log(URL);
@@ -121,11 +122,39 @@ function trailsHandler(request, response) {
       response.status(200).send(trail);
     })
     .catch((error) => {
-      response.status(500).send('Awww shoes, looks like the Tail Handler is not working!');
+      response.status(500).send('Awww shoes, looks like the Tail Handler is not working!(500)');
       console.log(error);
     });
 }
 
+
+// Movies Handler
+function moviesHandler(request, response) {
+  console.log('Miss Vanjie…. Miss… Vaaaaanjie… Miss Vaaaaaaaaaaaaanjiiiiiiie.');
+  let key = process.env.MOVIE_API_KEY;
+  let city = request.query.search_query;
+  // console.log(key);
+
+  const URL = `https://api.themoviedb.org/3/search/movie?api_key=${key}&language=en-US&query=${city}&page=1&include_adult=false`;
+
+  // const URL = `https://api.themoviedb.org/3/search/movie?api_key=f90535b0bf0f64bd249c22304a5427f3&language=en-US&query=seattle&page=1&include_adult=false`;
+
+  // console.log('Data moviesHandler', obj.data.body);
+
+  superagent.get(URL)
+    // console.log('Movies URL', URL);
+    .then(data => {
+      // console.log('Movies Data', data)
+      let movie = data.body.results.map(val => {
+        return new Movies(val);
+      });
+      response.status(200).send(movie);
+    })
+    .catch((error) => {
+      response.status(500).send('Impersonating Beyoncè is not your destiny, child!(500)');
+      console.log(error);
+    });
+}
 
 // Location Constructor
 function Location(obj, query) {
@@ -153,6 +182,17 @@ function Trails(obj) {
   this.conditions = obj.conditionStatus;
   this.condition_date = obj.conditionDate.slice(0, 10);
   this.condition_time = obj.conditionDate.slice(11, 20);
+}
+
+// Movies Constructor
+function Movies(obj) {
+this.title = obj.original_title;
+this.overview = obj.overview;
+this.average_votes = obj.vote_average;
+this.total_votes = obj.vote_count;
+this.image_url = `https://image.tmdb.org/t/p/w500${obj.poster_path}`;
+this.popularity = obj.popularity;
+this.release_date = obj.release_date;
 }
 
 // Database Connection
